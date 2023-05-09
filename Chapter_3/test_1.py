@@ -1,4 +1,5 @@
 from keras.models import Sequential
+import tensorflow as tf
 from keras.layers.core import Dense
 from keras.optimizers import Adam
 from keras.utils import np_utils
@@ -16,8 +17,12 @@ def load_data():
     x_train = x_train.astype('float32')#将它的元素类型转换为float32,之前为uint8
     x_test = x_test.astype('float32')
     # y_train之前可以理解为10000x1的数组，每个单元素数组的值就是样本所表示的数字
-    y_train = np_utils.to_categorical(y_train,10)# 把它转换成了10000x10的数组
-    y_test = np_utils.to_categorical(y_test,10)
+    # 转为 one-hot编码
+    # y_train = tf.one_hot(y_train,10)
+    # y_test = tf.one_hot(y_test,10)
+    # 使用 np_utils.to_categorical() 函数将标签转换为 Numpy 数组的 one-hot 编码
+    y_train = np_utils.to_categorical(y_train, num_classes=10)
+    y_test = np_utils.to_categorical(y_test, num_classes=10)
     x_train = x_train/255 # x_train之前的灰度值最大为255，最小为0，这里将它们进行特征归一化，变成了在0到1之间的小数
     x_test = x_test/255
     return (x_train,y_train),(x_test,y_test)
@@ -37,7 +42,7 @@ def run():
 
     # 损失函数选择均方误差, 选择Adam自适应优化器
     model.compile(loss='mse',optimizer=Adam(),metrics=['accuracy'])
-    model.fit(x_train,y_train,batch_size=100,epochs=50)
+    model.fit(x_train,y_train,epochs=50,batch_size=100)
 
     result = model.evaluate(x_test,y_test)
     print('\nTest Acc:%.2f%%' % (result[1] * 100))
